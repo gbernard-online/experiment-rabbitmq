@@ -6,9 +6,7 @@ rabbitmq-diagnostics --formatter=json cluster_status | jq .running_nodes
   "rabbit@rabbitmq-2",
   "rabbit@rabbitmq-3"
 ]
-```
 
-```bash
 $ for number in {1..3}; do sudo docker compose exec rabbitmq-$number \
 rabbitmq-diagnostics --formatter=json status | jq .rabbitmq_version; done
 "4.3.2"
@@ -21,6 +19,8 @@ false
 false
 false
 ```
+
+![capture-00](capture-00.webp "capture")
 
 ```bash
 $ sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
@@ -85,7 +85,11 @@ rabbitmq-diagnostics --formatter=json list_permissions | jq
     "configure": ".*"
   }
 ]
-```bash
+```
+
+![capture-01](capture-01.webp "capture")
+
+![capture-02](capture-02.webp "capture")
 
 ```bash
 $ sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
@@ -209,7 +213,7 @@ jq 'sort_by(.destination_name)'
 ]
 ```
 
-![capture-01](capture-01.webp "capture 01")
+![capture-04](capture-04.webp "capture")
 
 ```bash
 $ for number in {1..3}; do sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
@@ -260,3 +264,4 @@ jq 'map(select(.source_name == "amq.direct")) | sort_by(.destination_name)'
   }
 ]
 ```
+![capture-05](capture-05.webp "capture")
