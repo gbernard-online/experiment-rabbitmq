@@ -1,0 +1,62 @@
+networks:
+  docker:
+    external: true
+
+services:
+  rabbitmq-1:
+    container_name: rabbitmq-1
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: $RABBITMQ_PASSWORD
+      RABBITMQ_ERLANG_COOKIE: $RABBITMQ_COOKIE
+    hostname: rabbitmq-1
+    image: rabbitmq:4.3.2-management-alpine
+    networks:
+      - docker
+    restart: unless-stopped
+    ulimits:
+      nofile:
+        hard: 65536
+        soft: 65536
+    volumes:
+      - /opt/docker/rabbitmq/data-1:/var/lib/rabbitmq
+      - /opt/docker/rabbitmq/etc/defaults.conf:/etc/rabbitmq/conf.d/10-defaults.conf:ro
+      - /opt/docker/rabbitmq/etc/enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
+  rabbitmq-2:
+    container_name: rabbitmq-2
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: $RABBITMQ_PASSWORD
+      RABBITMQ_ERLANG_COOKIE: $RABBITMQ_COOKIE
+    hostname: rabbitmq-2
+    image: rabbitmq:4.3.2-management-alpine
+    networks:
+      - docker
+    restart: unless-stopped
+    ulimits:
+      nofile:
+        hard: 65536
+        soft: 65536
+    volumes:
+      - /opt/docker/rabbitmq/data-2:/var/lib/rabbitmq
+      - /opt/docker/rabbitmq/etc/defaults.conf:/etc/rabbitmq/conf.d/10-defaults.conf:ro
+      - /opt/docker/rabbitmq/etc/enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
+  rabbitmq-3:
+    container_name: rabbitmq-3
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: $RABBITMQ_PASSWORD
+      RABBITMQ_ERLANG_COOKIE: $RABBITMQ_COOKIE
+    hostname: rabbitmq-3
+    image: rabbitmq:4.3.2-management-alpine
+    networks:
+      - docker
+    restart: unless-stopped
+    ulimits:
+      nofile:
+        hard: 65536
+        soft: 65536
+    volumes:
+      - /opt/docker/rabbitmq/data-3:/var/lib/rabbitmq
+      - /opt/docker/rabbitmq/etc/defaults.conf:/etc/rabbitmq/conf.d/10-defaults.conf:ro
+      - /opt/docker/rabbitmq/etc/enabled_plugins:/etc/rabbitmq/enabled_plugins:ro
