@@ -5,8 +5,9 @@ docker/compose.yml
 docker/haproxy.cfg
 docker/etc/defaults.conf
 docker/etc/enabled_plugins
+notebook/NOTES.md
+notebook/capture-01.webp
 notebook/img/github.webp
 notebook/img/linkedin.webp
-NOTES.txt
 .files.txt
 README.md
