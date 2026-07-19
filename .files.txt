@@ -6,7 +6,7 @@ docker/haproxy.cfg
 docker/etc/defaults.conf
 docker/etc/enabled_plugins
 notebook/img/github.webp
-notebook/img/linkin.webp
+notebook/img/linkedin.webp
 NOTES.txt
 .files.txt
 README.md
