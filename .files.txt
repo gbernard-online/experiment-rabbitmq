@@ -2,7 +2,9 @@
 .editorconfig
 .prettierrc
 docker/compose.yml
+docker/haproxy.cfg
 docker/etc/defaults.conf
 docker/etc/enabled_plugins
+NOTES.txt
 .files.txt
 README.md
