@@ -6,7 +6,12 @@ docker/haproxy.cfg
 docker/etc/defaults.conf
 docker/etc/enabled_plugins
 notebook/NOTES.md
+notebook/capture-00.webp
 notebook/capture-01.webp
+notebook/capture-02.webp
+notebook/capture-03.webp
+notebook/capture-04.webp
+notebook/capture-05.webp
 notebook/img/github.webp
 notebook/img/linkedin.webp
 .files.txt
