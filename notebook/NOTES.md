@@ -219,12 +219,12 @@ jq 'sort_by(.destination_name)'
 $ for number in {1..3}; do sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
 rabbitmqadmin --password=$(pass homeware.ovh/docker/rabbitmq/admin) \
 --username=admin bindings declare --destination=queue-$number --destination-type=queue \
---routing-key=queue-$number --source='amq.direct'; done
+--routing-key=queue-$number --source=amq.direct; done
 
 $ sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
 rabbitmqadmin --password=$(pass homeware.ovh/docker/rabbitmq/admin) --username=admin \
 bindings declare --destination=queue --destination-type=queue --routing-key='' \
---source='amq.direct'
+--source=amq.direct
 
 $ sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
 rabbitmq-diagnostics --formatter=json list_bindings |
@@ -265,3 +265,99 @@ jq 'map(select(.source_name == "amq.direct")) | sort_by(.destination_name)'
 ]
 ```
 ![capture-05](capture-05.webp "capture")
+
+```bash
+$ for number in {1..3}; do sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
+rabbitmqadmin --password=$(pass homeware.ovh/docker/rabbitmq/admin) \
+--username=admin bindings declare --destination=queue-$number --destination-type=queue \
+--routing-key=queue-$number --source=amq.fanout; done
+
+$ sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
+rabbitmq-diagnostics --formatter=json list_bindings |
+jq 'map(select(.source_name == "amq.fanout")) | sort_by(.destination_name)'
+[
+  {
+    "arguments": [],
+    "source_name": "amq.fanout",
+    "source_kind": "exchange",
+    "destination_name": "queue-1",
+    "destination_kind": "queue",
+    "routing_key": "queue-1"
+  },
+  {
+    "arguments": [],
+    "source_name": "amq.fanout",
+    "source_kind": "exchange",
+    "destination_name": "queue-2",
+    "destination_kind": "queue",
+    "routing_key": "queue-2"
+  },
+  {
+    "arguments": [],
+    "source_name": "amq.fanout",
+    "source_kind": "exchange",
+    "destination_name": "queue-3",
+    "destination_kind": "queue",
+    "routing_key": "queue-3"
+  }
+]
+```
+
+![capture-06](capture-06.webp "capture")
+
+
+```bash
+$ for number in {1..3}; do sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
+rabbitmqadmin --password=$(pass homeware.ovh/docker/rabbitmq/admin) \
+--username=admin bindings declare --destination=queue-$number --destination-type=queue \
+--routing-key=queue-$number --source=amq.topic; done
+
+$ sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
+rabbitmqadmin --password=$(pass homeware.ovh/docker/rabbitmq/admin) --username=admin \
+bindings declare --destination=queue --destination-type=queue --routing-key='*' \
+--source=amq.topic
+
+$ sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
+rabbitmq-diagnostics --formatter=json list_bindings |
+jq 'map(select(.source_name == "amq.topic")) | sort_by(.destination_name)'
+
+$ sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
+rabbitmq-diagnostics --formatter=json list_bindings |
+jq 'map(select(.source_name == "amq.topic")) | sort_by(.destination_name)'
+[
+  {
+    "arguments": [],
+    "source_name": "amq.topic",
+    "source_kind": "exchange",
+    "destination_name": "queue",
+    "destination_kind": "queue",
+    "routing_key": "*"
+  },
+  {
+    "arguments": [],
+    "source_name": "amq.topic",
+    "source_kind": "exchange",
+    "destination_name": "queue-1",
+    "destination_kind": "queue",
+    "routing_key": "queue-1"
+  },
+  {
+    "arguments": [],
+    "source_name": "amq.topic",
+    "source_kind": "exchange",
+    "destination_name": "queue-2",
+    "destination_kind": "queue",
+    "routing_key": "queue-2"
+  },
+  {
+    "arguments": [],
+    "source_name": "amq.topic",
+    "source_kind": "exchange",
+    "destination_name": "queue-3",
+    "destination_kind": "queue",
+    "routing_key": "queue-3"
+  }
+]
+```
+
+![capture-07](capture-07.webp "capture")
