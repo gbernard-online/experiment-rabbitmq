@@ -1,0 +1,7 @@
+.gitignore
+.editorconfig
+docker/compose.yml
+docker/etc/defaults.conf
+docker/etc/enabled_plugins
+.files.txt
+README.md
