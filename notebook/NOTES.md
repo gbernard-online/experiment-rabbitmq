@@ -123,7 +123,7 @@ rabbitmqadmin --password=$(pass homeware.ovh/docker/rabbitmq/admin) --username=a
 queues declare --arguments='{"x-queue-type":"quorum"}' --name=queue
 
 $ sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
-rabbitmq-diagnostics --formatter=json list_queues | jq
+rabbitmq-diagnostics --formatter=json list_queues | jq 'sort_by(.name)'
 [
   {
     "messages": 0,
@@ -144,7 +144,7 @@ rabbitmq-diagnostics --formatter=json list_queues | jq
 ]
 
 $ sudo docker compose exec rabbitmq-1 \
-rabbitmq-diagnostics --formatter=json list_queues --local | jq
+rabbitmq-diagnostics --formatter=json list_queues --local | jq 'sort_by(.name)'
 [
   {
     "messages": 0,
@@ -157,7 +157,7 @@ rabbitmq-diagnostics --formatter=json list_queues --local | jq
 ]
 
 $ sudo docker compose exec rabbitmq-2 \
-rabbitmq-diagnostics --formatter=json list_queues --local | jq
+rabbitmq-diagnostics --formatter=json list_queues --local | jq 'sort_by(.name)'
 [
   {
     "messages": 0,
@@ -166,7 +166,7 @@ rabbitmq-diagnostics --formatter=json list_queues --local | jq
 ]
 
 $ sudo docker compose exec rabbitmq-3 \
-rabbitmq-diagnostics --formatter=json list_queues --local | jq
+rabbitmq-diagnostics --formatter=json list_queues --local | jq 'sort_by(.name)'
 [
   {
     "messages": 0,
@@ -361,3 +361,247 @@ jq 'map(select(.source_name == "amq.topic")) | sort_by(.destination_name)'
 ```
 
 ![capture-07](capture-07.webp "capture")
+
+```bash
+$ sudo pacman --noconfirm --noprogressbar --sync librabbitmq-c
+warning: librabbitmq-c-0.16.0-1 is up to date -- reinstalling
+resolving dependencies...
+looking for conflicting packages...
+
+Packages (1) librabbitmq-c-0.16.0-1
+
+Total Installed Size:  0.38 MiB
+Net Upgrade Size:      0.00 MiB
+
+:: Proceed with installation? [Y/n]
+checking keyring...
+checking package integrity...
+loading package files...
+checking for file conflicts...
+checking available disk space...
+:: Processing package changes...
+reinstalling librabbitmq-c...
+:: Running post-transaction hooks...
+(1/1) Arming ConditionNeedsUpdate...
+```
+
+```bash
+$ sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
+rabbitmq-diagnostics --formatter=json list_queues | jq 'sort_by(.name)'
+[
+  {
+    "messages": 0,
+    "name": "queue"
+  },
+  {
+    "messages": 0,
+    "name": "queue-1"
+  },
+  {
+    "messages": 0,
+    "name": "queue-2"
+  },
+  {
+    "messages": 0,
+    "name": "queue-3"
+  }
+]
+
+$ for number in {1..3}; do amqp-publish --body=message \
+--cacert=/etc/ca-certificates/extracted/ca-bundle.trust.crt \
+--password=$(pass homeware.ovh/docker/rabbitmq/user) --routing-key=queue-$number \
+--server=rabbitmq.homeware.ovh --ssl --username=user; done
+
+$ sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
+rabbitmq-diagnostics --formatter=json list_queues | jq 'sort_by(.name)'
+[
+  {
+    "messages": 1,
+    "name": "queue"
+  },
+  {
+    "messages": 1,
+    "name": "queue-1"
+  },
+  {
+    "messages": 1,
+    "name": "queue-2"
+  },
+  {
+    "messages": 1,
+    "name": "queue-3"
+  }
+]
+```
+
+![capture-03](capture-03.webp "capture")
+
+![capture-08](capture-08.webp "capture")
+
+```bash
+$ for number in {1..3}; do amqp-get --cacert=/etc/ca-certificates/extracted/ca-bundle.trust.crt \
+--password=$(pass homeware.ovh/docker/rabbitmq/user) --queue=queue-$number \
+--server=rabbitmq.homeware.ovh --ssl --username=user && echo; done
+message
+message
+message
+
+$ amqp-get --cacert=/etc/ca-certificates/extracted/ca-bundle.trust.crt \
+--password=$(pass homeware.ovh/docker/rabbitmq/user) --queue=queue \
+--server=rabbitmq.homeware.ovh --ssl --username=user && echo
+message
+```
+
+![capture-04](capture-04.webp "capture")
+
+```bash
+$ for number in {1..3}; do amqp-publish --body=message \
+--cacert=/etc/ca-certificates/extracted/ca-bundle.trust.crt --exchange=amq.direct \
+--password=$(pass homeware.ovh/docker/rabbitmq/user) --routing-key=queue-$number \
+--server=rabbitmq.homeware.ovh --ssl --username=user; done
+
+$ amqp-publish --body=message --cacert=/etc/ca-certificates/extracted/ca-bundle.trust.crt \
+--exchange=amq.direct --password=$(pass homeware.ovh/docker/rabbitmq/user) \
+--routing-key='' --server=rabbitmq.homeware.ovh --ssl --username=user
+
+$ sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
+rabbitmq-diagnostics --formatter=json list_queues | jq 'sort_by(.name)'
+[
+  {
+    "messages": 1,
+    "name": "queue"
+  },
+  {
+    "messages": 1,
+    "name": "queue-1"
+  },
+  {
+    "messages": 1,
+    "name": "queue-2"
+  },
+  {
+    "messages": 1,
+    "name": "queue-3"
+  }
+]
+```
+
+![capture-04](capture-05.webp "capture")
+
+![capture-08](capture-08.webp "capture")
+
+```bash
+$ for number in {1..3}; do amqp-get --cacert=/etc/ca-certificates/extracted/ca-bundle.trust.crt \
+--password=$(pass homeware.ovh/docker/rabbitmq/user) --queue=queue-$number \
+--server=rabbitmq.homeware.ovh --ssl --username=user && echo; done
+message
+message
+message
+
+$ amqp-get --cacert=/etc/ca-certificates/extracted/ca-bundle.trust.crt \
+--password=$(pass homeware.ovh/docker/rabbitmq/user) --queue=queue \
+--server=rabbitmq.homeware.ovh --ssl --username=user && echo
+message
+```
+
+![capture-04](capture-04.webp "capture")
+
+```bash
+$ amqp-publish --body=message --cacert=/etc/ca-certificates/extracted/ca-bundle.trust.crt \
+--exchange=amq.fanout --password=$(pass homeware.ovh/docker/rabbitmq/user) \
+--server=rabbitmq.homeware.ovh --ssl --username=user
+
+$ sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
+rabbitmq-diagnostics --formatter=json list_queues | jq 'sort_by(.name)'
+[
+  {
+    "messages": 0,
+    "name": "queue"
+  },
+  {
+    "messages": 1,
+    "name": "queue-1"
+  },
+  {
+    "messages": 1,
+    "name": "queue-2"
+  },
+  {
+    "messages": 1,
+    "name": "queue-3"
+  }
+]
+```
+
+![capture-06](capture-06.webp "capture")
+
+![capture-09](capture-09.webp "capture")
+
+```bash
+$ for number in {1..3}; do amqp-get --cacert=/etc/ca-certificates/extracted/ca-bundle.trust.crt \
+--password=$(pass homeware.ovh/docker/rabbitmq/user) --queue=queue-$number \
+--server=rabbitmq.homeware.ovh --ssl --username=user && echo; done
+message
+message
+message
+```
+
+![capture-04](capture-04.webp "capture")
+
+
+```bash
+$ for number in {1..3}; do amqp-publish --body=message \
+--cacert=/etc/ca-certificates/extracted/ca-bundle.trust.crt --exchange=amq.topic \
+--password=$(pass homeware.ovh/docker/rabbitmq/user) --routing-key=queue-$number \
+--server=rabbitmq.homeware.ovh --ssl --username=user; done
+
+$ amqp-publish --body=message --cacert=/etc/ca-certificates/extracted/ca-bundle.trust.crt \
+--exchange=amq.topic --password=$(pass homeware.ovh/docker/rabbitmq/user) \
+--routing-key=none --server=rabbitmq.homeware.ovh --ssl --username=user
+
+$ amqp-publish --body=message --cacert=/etc/ca-certificates/extracted/ca-bundle.trust.crt \
+--exchange=amq.topic --password=$(pass homeware.ovh/docker/rabbitmq/user) \
+--routing-key='' --server=rabbitmq.homeware.ovh --ssl --username=user
+
+$ sudo docker compose exec rabbitmq-$((RANDOM % 3 + 1)) \
+rabbitmq-diagnostics --formatter=json list_queues | jq 'sort_by(.name)'
+[
+  {
+    "messages": 4,
+    "name": "queue"
+  },
+  {
+    "messages": 1,
+    "name": "queue-1"
+  },
+  {
+    "messages": 1,
+    "name": "queue-2"
+  },
+  {
+    "messages": 1,
+    "name": "queue-3"
+  }
+]
+```
+
+![capture-07](capture-07.webp "capture")
+
+![capture-10](capture-10.webp "capture")
+
+
+```bash
+$ for number in {1..3}; do amqp-get --cacert=/etc/ca-certificates/extracted/ca-bundle.trust.crt \
+--password=$(pass homeware.ovh/docker/rabbitmq/user) --queue=queue-$number \
+--server=rabbitmq.homeware.ovh --ssl --username=user && echo; done
+message
+message
+message
+
+$ amqp-consume --cacert=/etc/ca-certificates/extracted/ca-bundle.trust.crt --count=4 \
+--password=$(pass homeware.ovh/docker/rabbitmq/user) --queue=queue \
+--server=rabbitmq.homeware.ovh --ssl --username=user cat && echo
+messagemessagemessagemessage
+```
+
+![capture-04](capture-04.webp "capture")
