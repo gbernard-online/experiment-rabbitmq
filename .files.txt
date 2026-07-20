@@ -17,6 +17,8 @@ notebook/capture-07.webp
 notebook/capture-08.webp
 notebook/capture-09.webp
 notebook/capture-10.webp
+notebook/capture-11.webp
+notebook/capture-12.webp
 notebook/img/github.webp
 notebook/img/linkedin.webp
 .files.txt
